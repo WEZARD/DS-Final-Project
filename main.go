@@ -4,20 +4,21 @@ import (
     "fmt"
     "log"
     "net/http"
-    "container/list"
+    //"container/list"
     "html/template"
     "github.com/bradfitz/gomemcache/memcache"
     "github.com/gorilla/mux"
     "time"
-    "encoding/binary"
+    "encoding/gob"
+    "bytes"
 )
 
-type User struct {
-    username string
-    password string
-    following *list.List
-    follower *list.List
-    messages *list.List
+type User struct { // capitalize the first letter of each field name as "exported" for gob 
+    Username string
+    Password string
+    Following map[string]struct{}
+    Follower map[string]struct{}
+    Messages map[time.Time]string
 }
 
 type Message struct {
@@ -26,7 +27,7 @@ type Message struct {
 }
 
 func registerHandler(response http.ResponseWriter, request *http.Request) {
-	fmt.Println("method:", request.Method)//get request method
+	fmt.Println("method:", request.Method) // get request method
     if request.Method == "GET" {
         t, _ := template.ParseFiles("register.gtpl")
         t.Execute(response, nil)
@@ -36,21 +37,36 @@ func registerHandler(response http.ResponseWriter, request *http.Request) {
         mc := memcache.New("127.0.0.1:11211")
         username := request.FormValue("username")
         password := request.FormValue("password")
-        user := &User{}
-        user.password = password
-        //TODO  Encode struct to byte array
-
+        following := make(map[string]struct{})
+        follower := make(map[string]struct{})
+        user := User {
+            Username: username,
+            Password: password,
+            Following: following,
+            Follower: follower,
+        }
         
-        val, err := mc.Get("username")
+        //TODO  Encode struct to byte array
+        encBuf := new(bytes.Buffer)
+        encErr := gob.NewEncoder(encBuf).Encode(user)
+        if encErr != nil {
+            log.Fatal(encErr)
+        }
+        value := encBuf.Bytes()
+
+     
+        _, err := mc.Get(username)
+        
         if err == nil {
             fmt.Fprintf(response, "<script>alert('this username has been registered')</script>")
             t, _ := template.ParseFiles("register.gtpl")
             t.Execute(response, nil)
         } else {
             fmt.Println(err)
-            mc.Set(&memcache.Item{Key: username, Value: []byte(user)})
+            mc.Set(&memcache.Item{Key: username, Value: []byte(value)})
+            
             t, _ := template.ParseFiles("home.gtpl")
-                t.Execute(response, nil)
+            t.Execute(response, nil)
         }
     }
 }
@@ -66,13 +82,18 @@ func loginHandler(response http.ResponseWriter, request *http.Request) {
         username := request.FormValue("username")
         password := request.FormValue("password")
 
-        val, err := mc.Get("username")
-        //TODO  Decode byte array to struct  
+        val, err := mc.Get(username)
+        //TODO  Decode byte array to struct
+        decBuf := bytes.NewBuffer(val.Value)
+        userOut := User{}
+        err = gob.NewDecoder(decBuf).Decode(&userOut)
+
         if err == nil {
-            if password == val.Value {
+            if password == userOut.Password {
                 t, _ := template.ParseFiles("home.gtpl")
                 t.Execute(response, nil)
             } else {
+                fmt.Fprintf(response, "<script>alert('wrong username or password')</script>")
                 t, _ := template.ParseFiles("login.gtpl")
                 t.Execute(response, nil)
             }
