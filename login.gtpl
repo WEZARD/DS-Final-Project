@@ -37,8 +37,8 @@ function InputCheck(login_form) {
 
 <ul class="fr hd-bar">
     <li>Customer Service：<span>9292888888</span></li>
-    <li class="active"><a href="login">[Sign In]</a></li>
-    <li><a href="register">[Sign Up]</a></li>
+    <li class="active"><a href="/login">[Sign In]</a></li>
+    <li><a href="/register">[Sign Up]</a></li>
 </ul>
 </div>
 </div>
