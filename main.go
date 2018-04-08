@@ -151,11 +151,33 @@ func homeHandler(response http.ResponseWriter, request *http.Request) {
     if request.Method == "GET" {
         t, _ := template.ParseFiles("home.gtpl")
         t.Execute(response, nil)
-        username := getUserName(request)
-        fmt.Fprintf(response, "This is a test for the broadcasting system %s!", username)
+        //username := getUserName(request)
+        //fmt.Fprintf(response, "This is a test for the broadcasting system %s!", username)
 
     }
     if request.Method == "POST" {
+        t, _ := template.ParseFiles("home.gtpl")
+        t.Execute(response, nil)
+    }
+}
+
+// addfollowHandler
+func addfollowHandler(response http.ResponseWriter, request *http.Request) {
+    //fmt.Fprintf(response, "This is a test for the broadcasting system %s!", r.URL.Path[1:])
+    if request.Method == "GET" {
+        t, _ := template.ParseFiles("addfollow.gtpl")
+        t.Execute(response, nil)
+
+    }
+}
+
+// cancelHandler
+func cancelHandler(response http.ResponseWriter, request *http.Request) {
+    //fmt.Fprintf(response, "This is a test for the broadcasting system %s!", r.URL.Path[1:])
+    if request.Method == "GET" {
+        t, _ := template.ParseFiles("cancel.gtpl")
+        t.Execute(response, nil)
+
     }
 }
 
@@ -183,5 +205,7 @@ func main() {
     router.HandleFunc("/register", registerHandler)
     router.HandleFunc("/login", loginHandler)
     router.HandleFunc("/home", homeHandler)
+    router.HandleFunc("/addfollow", addfollowHandler)
+    router.HandleFunc("/cancel", cancelHandler)
     log.Fatal(http.ListenAndServe(":8080", nil))
 }

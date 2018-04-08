@@ -10,18 +10,14 @@
 	<h1>Home Page</h1>
       </div>
       <div style="float:right; width:50%; height:100%; text-align:center; margin-top:20px">
-	<form action="/cancelaccount" method="post" name="cancelaccount_form">
-	  <input type="submit" value="Cancle Account">
-	</form>
+	<a href="/cancel">[Cancel Account]</a>
       </div>
     </div>
-    <div id＝"main">
+    <div>
        <div id="follower" style="float:left; width:30%">
 	 <div style="float:left; width:80px">Followers</div>
 	 <div style="margin-left: 80px">
-	   <form action="/addfollowing" method="post" name="addfollow_form">
-	     <input type="submit" value="Add follow">
-	   </form>
+	   <a href="/addfollow">[Add Follow]</a>
 	 </div><br />
 	 <p>user one</p>
 	 <p>user two</p>
