@@ -41,11 +41,13 @@ func registerHandler(response http.ResponseWriter, request *http.Request) {
         password := request.FormValue("password")
         following := make(map[string]struct{})
         follower := make(map[string]struct{})
+	messages := make(map[time.Time]string)
         user := User {
             Username: username,
             Password: password,
             Following: following,
             Follower: follower,
+	    Messages: messages,
         }
         _, memErr := mc.Get(username)
         
@@ -82,27 +84,33 @@ func loginHandler(response http.ResponseWriter, request *http.Request) {
         password := request.FormValue("password")
 
         val, memErr := mc.Get(username)
-        //TODO  Decode byte array to struct
-        decBuf := bytes.NewBuffer(val.Value)
-        userOut := User{}
-        decErr := gob.NewDecoder(decBuf).Decode(&userOut)
-        if decErr != nil {
-            log.Fatal(decErr)
-        }
-
-        if memErr == nil {
-            if password == userOut.Password {
-                setSession(username, response)
-                fmt.Println(username, getUserName(request))
-                http.Redirect(response, request, "/home", http.StatusSeeOther)
-            } else {
-                fmt.Fprintf(response, "<script>alert('wrong username or password')</script>")
-                t, _ := template.ParseFiles("login.gtpl")
-                t.Execute(response, nil)
+	if memErr != nil {
+	    fmt.Printf("user not exist")
+            fmt.Fprintf(response, "<script>alert('username doesn't exist')</script>")
+            t, _ := template.ParseFiles("login.gtpl")
+            t.Execute(response, nil)
+        } else {
+            //TODO  Decode byte array to struct
+            decBuf := bytes.NewBuffer(val.Value)
+            userOut := User{}
+            decErr := gob.NewDecoder(decBuf).Decode(&userOut)
+            if decErr != nil {
+                log.Fatal(decErr)
             }
+
+            if memErr == nil {
+                if password == userOut.Password {
+                    setSession(username, response)
+                    fmt.Println(username, getUserName(request))
+                    http.Redirect(response, request, "/home", http.StatusSeeOther)
+                } else {
+                    fmt.Fprintf(response, "<script>alert('wrong username or password')</script>")
+                    t, _ := template.ParseFiles("login.gtpl")
+                    t.Execute(response, nil)
+                }
+            }
+
         }
-
-
     }
 }
 
@@ -127,7 +135,7 @@ func setSession(userName string, response http.ResponseWriter) {
 }
 
 func getUserName(request *http.Request) (userName string) {
-    if cookie, err := request.Cookie("session"); err == nil {
+     if cookie, err := request.Cookie("session"); err == nil {
         cookieValue := make(map[string]string)
         if err = cookieHandler.Decode("session", cookie.Value, &cookieValue); err == nil {
             userName = cookieValue["name"]
@@ -151,13 +159,37 @@ func homeHandler(response http.ResponseWriter, request *http.Request) {
     if request.Method == "GET" {
         t, _ := template.ParseFiles("home.gtpl")
         t.Execute(response, nil)
-        //username := getUserName(request)
-        //fmt.Fprintf(response, "This is a test for the broadcasting system %s!", username)
-
     }
     if request.Method == "POST" {
-        t, _ := template.ParseFiles("home.gtpl")
-        t.Execute(response, nil)
+       	request.ParseForm()
+        mc := memcache.New("127.0.0.1:11211") // brew services restart memcached
+        username := getUserName(request)
+	postcontent := request.FormValue("postcontent")
+	val, memErr := mc.Get(username)
+	if memErr == nil {
+	    decBuf := bytes.NewBuffer(val.Value)
+	    user := User{}
+	    decErr := gob.NewDecoder(decBuf).Decode(&user)
+	    if decErr != nil {
+	        log.Fatal(decErr)
+	    }
+	    user.Messages[time.Now()] = postcontent
+	    fmt.Printf("-- %s", user.Messages)
+	    
+	    encBuf := new(bytes.Buffer)
+            encErr := gob.NewEncoder(encBuf).Encode(user)
+            if encErr != nil {
+                log.Fatal(encErr)
+            }
+            value := encBuf.Bytes()
+            mc.Set(&memcache.Item{Key: username, Value: []byte(value)})
+            t, _ := template.ParseFiles("home.gtpl")
+            t.Execute(response, nil)
+        } else {
+            fmt.Fprintf(response, "<script>alert('Failed to post')</script>")
+	    t, _ := template.ParseFiles("home.gtpl")
+            t.Execute(response, nil)
+        }
     }
 }
 
@@ -177,7 +209,19 @@ func cancelHandler(response http.ResponseWriter, request *http.Request) {
     if request.Method == "GET" {
         t, _ := template.ParseFiles("cancel.gtpl")
         t.Execute(response, nil)
-
+    } else {
+        mc := memcache.New("127.0.0.1:11211") // brew services restart memcached
+        username := getUserName(request)
+	delErr := mc.Delete(username)
+	if delErr != nil{
+	    fmt.Fprintf(response, "<script>alert('Failed to cancel account')</script>")
+	    t, _ := template.ParseFiles("cancel.gtpl")
+            t.Execute(response, nil)
+	}else {
+	    fmt.Fprintf(response, "<script>alert('Success')</script>")
+	    t, _ := template.ParseFiles("login.gtpl")
+            t.Execute(response, nil)
+	}
     }
 }
 

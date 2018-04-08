@@ -32,7 +32,7 @@
 </div>
 <body>
     <div style="color:green; text-align:center; position:absolute; bottom:0; width:100%;" class="footer">
-      <form action="post.php" method="post">
+      <form method="post">
 	<p>Share with your friends:</p>
 	<input type="text" name="postcontent" style="width:80%; height:100px"><br>
 	<p></p><p></p><input type="submit" value="post"></p>

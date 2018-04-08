@@ -7,7 +7,7 @@
    <div class="container">
 <h1>Cancel Page</h1>
 
-<form name="cancel_form" method="post" action="/login" onSubmit="return InputCheck(this)" autocomplete="off">
+<form name="cancel_form" method="post" action="/cancel">
   <p>Confirm to cancel this account</p>
   <button type="submit">Cancel</button>
     
