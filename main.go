@@ -112,7 +112,7 @@ func registerHandler(response http.ResponseWriter, request *http.Request) {
             Following: following,
             Follower: follower,
             Messages: newMessages,
-        }
+        } // initialize all the elements
         _, memErr = mc.Get(username)
         
         if memErr == nil {
@@ -443,8 +443,7 @@ func postHandler(response http.ResponseWriter, request *http.Request) {
         now := time.Now()
         username := getUserName(request)
         userInfo := getUserInfo(request)
-        content := request.FormValue("postcontent")
-        userInfo.Messages[now] = content
+        userInfo.Messages[now] = request.FormValue("postcontent")
         mc := memcache.New("127.0.0.1:11211") 
 
         mc.Delete(username)
