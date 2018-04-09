@@ -40,7 +40,7 @@ type MessageBox struct {
 
 // registerHandler
 func registerHandler(response http.ResponseWriter, request *http.Request) {
-	fmt.Println("method:", request.Method) // get request method
+    fmt.Println("method:", request.Method) // get request method
     if request.Method == "GET" {
         t, _ := template.ParseFiles("register.gtpl")
         t.Execute(response, nil)
