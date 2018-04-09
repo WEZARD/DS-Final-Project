@@ -16,7 +16,7 @@
         <div id="following" style="float:left; width:30%">
             <div style="float:left; width:80px">Following</div>
             <div style="margin-left: 80px">
-                <a href="/addfollow">[Add Follow]</a>
+                <a href="/follow">[Add Follow]</a>
             </div><br />
             {{range $key, $value := .Following}}
             <p>{{$key}}</p>
