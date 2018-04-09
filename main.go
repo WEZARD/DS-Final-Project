@@ -430,6 +430,34 @@ func addHandler(response http.ResponseWriter, request *http.Request) {
     }
 }
 
+// postlHandler
+func postHandler(response http.ResponseWriter, request *http.Request) {
+    if request.Method == "POST" {
+        now := time.Now()
+        fmt.Println("----------------")
+        fmt.Println(now)
+        fmt.Println("----------------")
+        username := getUserName(request)
+        userInfo := getUserInfo(request)
+        content := request.FormValue("postcontent")
+        fmt.Println(content)
+        fmt.Println("----------------")
+        userInfo.Messages[now] = content
+        mc := memcache.New("127.0.0.1:11211") 
+
+        mc.Delete(username)
+        encBuf := new(bytes.Buffer)
+        encErr := gob.NewEncoder(encBuf).Encode(userInfo)
+        if encErr != nil {
+            log.Fatal(encErr)
+        }
+        value := encBuf.Bytes()
+        mc.Set(&memcache.Item{Key: username, Value: []byte(value)})
+
+        http.Redirect(response, request, "/home", http.StatusSeeOther)
+    }
+}
+
 // cancelHandler
 func cancelHandler(response http.ResponseWriter, request *http.Request) {
     if request.Method == "GET" {
@@ -469,6 +497,7 @@ func main() {
     router.HandleFunc("/home", homeHandler)
     router.HandleFunc("/follow", followHandler)
     router.HandleFunc("/add", addHandler)
+    router.HandleFunc("/post", postHandler)
     router.HandleFunc("/cancel", cancelHandler)
     log.Fatal(http.ListenAndServe(":8080", nil))
 }
