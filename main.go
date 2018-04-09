@@ -104,11 +104,14 @@ func registerHandler(response http.ResponseWriter, request *http.Request) {
         follower := map[string]bool {testUser1.Username: true, testUser2.Username: true}
         //following := make(map[string]bool)
         //follower := make(map[string]bool)
+        newMessages := make(map[time.Time]string)
+
         user := User {
             Username: username,
             Password: password,
             Following: following,
             Follower: follower,
+            Messages: newMessages,
         }
         _, memErr = mc.Get(username)
         
@@ -145,15 +148,15 @@ func loginHandler(response http.ResponseWriter, request *http.Request) {
         password := request.FormValue("password")
 
         val, memErr := mc.Get(username)
-        // Decode byte array to struct
-        decBuf := bytes.NewBuffer(val.Value)
-        userOut := User{}
-        decErr := gob.NewDecoder(decBuf).Decode(&userOut)
-        if decErr != nil {
-            log.Fatal(decErr)
-        }
 
         if memErr == nil {
+            // Decode byte array to struct
+            decBuf := bytes.NewBuffer(val.Value)
+            userOut := User{}
+            decErr := gob.NewDecoder(decBuf).Decode(&userOut)
+            if decErr != nil {
+                log.Fatal(decErr)
+            }
             if password == userOut.Password {
                 setSession(username, response)
                 fmt.Println(username, getUserName(request))
@@ -163,6 +166,10 @@ func loginHandler(response http.ResponseWriter, request *http.Request) {
                 t, _ := template.ParseFiles("login.gtpl")
                 t.Execute(response, nil)
             }
+        } else {
+            fmt.Fprintf(response, "<script>alert('wrong username or password')</script>")
+            t, _ := template.ParseFiles("login.gtpl")
+            t.Execute(response, nil)
         }
     }
 }
@@ -434,14 +441,9 @@ func addHandler(response http.ResponseWriter, request *http.Request) {
 func postHandler(response http.ResponseWriter, request *http.Request) {
     if request.Method == "POST" {
         now := time.Now()
-        fmt.Println("----------------")
-        fmt.Println(now)
-        fmt.Println("----------------")
         username := getUserName(request)
         userInfo := getUserInfo(request)
         content := request.FormValue("postcontent")
-        fmt.Println(content)
-        fmt.Println("----------------")
         userInfo.Messages[now] = content
         mc := memcache.New("127.0.0.1:11211") 
 
