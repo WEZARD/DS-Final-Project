@@ -32,6 +32,13 @@
             <div style="float:left; width:50%">
                 <h1>Message Box</h1>
             </div>
+            <div style="float:right; color:green; text-align:center; width:50%;">
+                <form name="post_form" method="post" action="/post" onSubmit="return InputCheck(this)" autocomplete="off">
+                    <p>Share with your friends:</p>
+                    <input type="text" name="postcontent" style="width:80%; height:100px"><br>
+                    <p><p></p><button type="submit" class="btn btn-default">post</button></p>
+                </form>
+            </div>
         </div>
         <div id="messages" style="float:left; width:30%">
             {{range .Messages}}
@@ -39,18 +46,9 @@
             <p><font size="2">{{.Username}} posted at </font><font size="1">{{.DisplayTime}}</font></p><br />
             {{end}}
         </div>
+
     </div>
 </div>
-
-<body>
-    <div style="color:green; text-align:center; position:absolute; bottom:0; width:100%;" class="footer">
-        <form name="post_form" method="post" action="/post" onSubmit="return InputCheck(this)" autocomplete="off">
-            <p>Share with your friends:</p>
-                <input type="text" name="postcontent" style="width:80%; height:100px"><br>
-            <p><p></p><button type="submit" class="btn btn-default">post</button></p>
-        </form>
-    </div>
-</body>
 
 <script language=JavaScript>
 <!--
