@@ -44,14 +44,25 @@
 
 <body>
     <div style="color:green; text-align:center; position:absolute; bottom:0; width:100%;" class="footer">
-        <form action="post.php" method="post">
+        <form name="post_form" method="post" action="/post" onSubmit="return InputCheck(this)" autocomplete="off">
             <p>Share with your friends:</p>
                 <input type="text" name="postcontent" style="width:80%; height:100px"><br>
-            <p></p><p></p><input type="submit" value="post"></p>
+            <p><p></p><button type="submit" class="btn btn-default">post</button></p>
         </form>
     </div>
 </body>
 
+<script language=JavaScript>
+<!--
+function InputCheck(post_form) { 
+    if (post_form.postcontent.value == "") {
+        alert("Write something to post!");  
+        post_form.postcontent.focus();  
+        return (false);
+    }
+} 
+//-->
+</script>
 
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
