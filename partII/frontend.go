@@ -70,11 +70,8 @@ func registerHandler(response http.ResponseWriter, request *http.Request) {
         t.Execute(response, nil)
     } else {
         request.ParseForm()
-        fmt.Println("username:", request.Form["username"])
-        
         username := request.FormValue("username")
         password := request.FormValue("password")
-
         registerArgs := User {
             Username: username,
             Password: password,
@@ -84,11 +81,8 @@ func registerHandler(response http.ResponseWriter, request *http.Request) {
         if err != nil {
             log.Fatal(err)
         }
-
         var registerRep RegisterReply
-
         err = client.Call("Listener.UserRegister", &registerArgs, &registerRep)
-        
         if err != nil {
             fmt.Print("client error:", err)
         }
@@ -98,7 +92,6 @@ func registerHandler(response http.ResponseWriter, request *http.Request) {
             t, _ := template.ParseFiles("register.gtpl")
             t.Execute(response, nil)
         }
-        
         if registerRep == true {    
             setSession(username, response)
             http.Redirect(response, request, "/home", http.StatusSeeOther)
@@ -116,7 +109,6 @@ func loginHandler(response http.ResponseWriter, request *http.Request) {
         fmt.Println("username:", request.Form["username"])
         username := request.FormValue("username")
         password := request.FormValue("password")
-
         loginArgs := User {
             Username: username,
             Password: password,
@@ -126,23 +118,17 @@ func loginHandler(response http.ResponseWriter, request *http.Request) {
         if err != nil {
             log.Fatal(err)
         }
-
         var loginRep LoginReply
-
-        err = client.Call("Listener.UserLogin", &loginArgs, &loginRep)
-        
+        err = client.Call("Listener.UserLogin", &loginArgs, &loginRep) 
         if err != nil {
             fmt.Print("client error:", err)
         }
-
 
         if loginRep == false {
             fmt.Fprintf(response, "<script>alert('wrong username or password')</script>")
             t, _ := template.ParseFiles("login.gtpl")
             t.Execute(response, nil)
         }
-                
-    
         if loginRep == true {
             setSession(username, response)
             http.Redirect(response, request, "/home", http.StatusSeeOther)
@@ -186,7 +172,6 @@ func getUserInfo(request *http.Request) *User {
         cookieValue := make(map[string]string)
         if err = cookieHandler.Decode("session", cookie.Value, &cookieValue); err == nil {
             username := cookieValue["name"]
-            
             infoArgs := User {
                 Username: username,
             }
@@ -195,15 +180,11 @@ func getUserInfo(request *http.Request) *User {
             if err != nil {
                 log.Fatal(err)
             }
-
             var infoRep User
-
             err = client.Call("Listener.UserInfo", &infoArgs, &infoRep)
-        
             if err != nil {
                 fmt.Print("client error:", err)
             }
-            
             return &infoRep
         }
     }
@@ -225,26 +206,19 @@ func clearSession(response http.ResponseWriter) {
 func homeHandler(response http.ResponseWriter, request *http.Request) {
     if request.Method == "GET" {
         t, _ := template.ParseFiles("home.gtpl")
-        
         userInfo := getUserInfo(request)
-        fmt.Printf("This is a test for %s\n", userInfo.Username)
-        
         client, err := rpc.Dial("tcp", rpcAdrr);
         if err != nil {
             log.Fatal(err)
         }
-
         var messageBox MessageBox
-
         err = client.Call("Listener.UserHome", &userInfo, &messageBox)
-        
         if err != nil {
             fmt.Print("client error:", err)
         }
-
         t.Execute(response, messageBox)
     }
-
+    
     if request.Method == "POST" {
         t, _ := template.ParseFiles("home.gtpl")
         t.Execute(response, nil)
@@ -298,7 +272,6 @@ func followHandler(response http.ResponseWriter, request *http.Request) {
     if request.Method == "POST" {
         followname := request.FormValue("username")
         userinfo := getUserInfo(request)
-        
         followArgs := UserSearch {
             Followname: followname,
             Userinfo: userinfo,
@@ -308,11 +281,8 @@ func followHandler(response http.ResponseWriter, request *http.Request) {
         if err != nil {
             log.Fatal(err)
         }
-
         var messageBox UserSearchReply
-
         err = client.Call("Listener.UserFollow", &followArgs, &messageBox)
-        
         if err != nil {
             fmt.Print("client error:", err)
         }
@@ -335,8 +305,7 @@ func followHandler(response http.ResponseWriter, request *http.Request) {
 func addHandler(response http.ResponseWriter, request *http.Request) {
     if request.Method == "POST" {
         followname := getSearch(request)
-        username := getUserName(request)
-        
+        username := getUserName(request) 
         addArgs := UserAdd {
             Followname: followname,
             Username: username,
@@ -346,11 +315,8 @@ func addHandler(response http.ResponseWriter, request *http.Request) {
         if err != nil {
             log.Fatal(err)
         }
-
         var userAddReply UserAddReply
-
         err = client.Call("Listener.UserAdd", &addArgs, &userAddReply)
-        
         if err != nil {
             fmt.Print("client error:", err)
         }
@@ -364,10 +330,8 @@ func addHandler(response http.ResponseWriter, request *http.Request) {
 // postlHandler
 func postHandler(response http.ResponseWriter, request *http.Request) {
     if request.Method == "POST" {
-        
         userinfo := getUserInfo(request)
         content := request.FormValue("postcontent")
-        
         postArgs := UserPost {
             Userinfo: userinfo,
             Content:  content,
@@ -377,11 +341,8 @@ func postHandler(response http.ResponseWriter, request *http.Request) {
         if err != nil {
             log.Fatal(err)
         }
-
         var userPostReply UserPostReply
-
         err = client.Call("Listener.UserPost", &postArgs, &userPostReply)
-        
         if err != nil {
             fmt.Print("client error:", err)
         }
@@ -389,7 +350,6 @@ func postHandler(response http.ResponseWriter, request *http.Request) {
         if userPostReply == true {
             http.Redirect(response, request, "/home", http.StatusSeeOther)
         }
-
     }
 }
 
@@ -399,21 +359,18 @@ func cancelHandler(response http.ResponseWriter, request *http.Request) {
         t, _ := template.ParseFiles("cancel.gtpl")
         t.Execute(response, nil)
     } 
+    
     if request.Method == "POST" {
-        
         cancelArgs := User {
             Username: getUserName(request),
         }
 
         var userCancelReply UserCancelReply
-
         client, err := rpc.Dial("tcp", rpcAdrr);
         if err != nil {
             log.Fatal(err)
         }
-
         err = client.Call("Listener.UserCancel", &cancelArgs, &userCancelReply)
-        
         if err != nil {
             fmt.Print("client error:", err)
         }
@@ -436,7 +393,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 var router = mux.NewRouter()
 
 func main() {
-    //mc := memcache.New("127.0.0.1:11211")
     fmt.Println("Welcome to message web application!")
 
     http.Handle("/", router)
@@ -448,5 +404,5 @@ func main() {
     router.HandleFunc("/add", addHandler)
     router.HandleFunc("/post", postHandler)
     router.HandleFunc("/cancel", cancelHandler)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+    log.Fatal(http.ListenAndServe(":8080", nil))
 }

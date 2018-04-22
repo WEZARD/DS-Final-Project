@@ -10,7 +10,7 @@
                 <h1>Home Page</h1>
             </div>
             <div style="float:right; width:50%; height:100%; text-align:center; margin-top:20px">
-                <a href="/cancel">[Cancel Account]</a>
+                <a href="/cancel">[Cancel Account] {{.Username}}</a>
             </div>
         </div>
         <div id="following" style="float:left; width:30%">

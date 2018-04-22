@@ -291,7 +291,6 @@ func (l *Listener) UserAdd(addArgs *UserAdd, userAddRep *UserAddReply) error {
     followname := addArgs.Followname
 
     val, _ := mc.Get(username)
-    // Decode byte array to struct
     decBuf := bytes.NewBuffer(val.Value)
     userSrc := User{}
     decErr := gob.NewDecoder(decBuf).Decode(&userSrc)
@@ -300,7 +299,6 @@ func (l *Listener) UserAdd(addArgs *UserAdd, userAddRep *UserAddReply) error {
     }
 
     val, _ = mc.Get(followname)
-    // Decode byte array to struct
     decBuf = bytes.NewBuffer(val.Value)
     userDest := User{}
     decErr = gob.NewDecoder(decBuf).Decode(&userDest)
@@ -339,10 +337,8 @@ func (l *Listener) UserPost(postArgs *UserPost, userPostRep *UserPostReply) erro
     userInfo := postArgs.Userinfo
     content := postArgs.Content
     username := userInfo.Username
-
     userInfo.Messages[now] = content
     mc := memcache.New("127.0.0.1:11211") 
-
     mc.Delete(username)
     encBuf := new(bytes.Buffer)
     encErr := gob.NewEncoder(encBuf).Encode(userInfo)
@@ -370,17 +366,15 @@ func (l *Listener) UserCancel(cancelArgs *User, userPostRep *UserPostReply) erro
 }
 
 func main() {
-	addy, err := net.ResolveTCPAddr("tcp", "0.0.0.0:42586")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	inbound, err := net.ListenTCP("tcp", addy)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	listener := new(Listener)
-	rpc.Register(listener)
-	rpc.Accept(inbound)
+    addy, err := net.ResolveTCPAddr("tcp", "0.0.0.0:42586")
+    if err != nil {
+        log.Fatal(err)
+    }
+    inbound, err := net.ListenTCP("tcp", addy)
+    if err != nil {
+        log.Fatal(err)
+    }
+    listener := new(Listener)
+    rpc.Register(listener)
+    rpc.Accept(inbound)
 }
