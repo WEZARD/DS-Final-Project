@@ -39,14 +39,24 @@
                     <p><p></p><button type="submit" class="btn btn-default">post</button></p>
                 </form>
             </div>
+            <div id="messages" style="float:left; width:30%">
+                {{range .Messages}}
+                <p><font size="3">{{.Text}}</font></p>
+                <p><font size="2">{{.Username}} posted at </font><font size="1">{{.DisplayTime}}</font></p><br />
+                {{end}}
+            </div>        
+        </div> 
+        <div style="width:100%; height:100px">
+            <div style="float:left; width:50%">
+                <h1>My Posts</h1>
+            </div>
         </div>
-        <div id="messages" style="float:left; width:30%">
-            {{range .Messages}}
+        <div id="usermessages" style="float:left; width:30%">
+            {{range .UserMessages}}
             <p><font size="3">{{.Text}}</font></p>
-            <p><font size="2">{{.Username}} posted at </font><font size="1">{{.DisplayTime}}</font></p><br />
+            <p><font size="2">You posted at </font><font size="1">{{.DisplayTime}}</font></p><br />
             {{end}}
         </div>
-
     </div>
 </div>
 

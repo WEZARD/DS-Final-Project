@@ -33,6 +33,7 @@ type MessageBox struct {
     Following map[string]bool
     Follower map[string]bool
     Messages []Message
+    UserMessages []Message
     Status bool
 }
 
