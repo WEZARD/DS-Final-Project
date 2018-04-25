@@ -35,6 +35,7 @@ type MessageBox struct {
     Following map[string]bool
     Follower map[string]bool
     Messages []Message
+    UserMessages []Message
     Status bool
 }
 
@@ -52,19 +53,20 @@ func registerHandler(response http.ResponseWriter, request *http.Request) {
         // ----------------------------------------Test Case---------------------------------------------
         testTime1 := time.Date(2018, 4, 4, 20, 00, 00, 651387237, time.UTC)
         testTime2 := time.Date(2018, 4, 5, 20, 00, 00, 651387237, time.UTC)
-        messages := map[time.Time]string {testTime1: "Hello World!", testTime2: "Welcome to our web service!"}
+        messages1 := map[time.Time]string {testTime1: "Service number: 9292888888!", testTime2: "Welcome to our web service!"}
+        messages2 := map[time.Time]string {testTime1: "Post what you like!", testTime2: "Follow the person you're interested!"}
 
         testUser1 := User {
-            Username: "Thierry",
-            Messages: messages,
+            Username: "CustomerService",
+            Messages: messages1,
         }
 
         testUser2 := User {
-            Username: "Ramsey",
-            Messages: messages,
+            Username: "ApplicationCenter",
+            Messages: messages2,
         }
 
-        _, memErr := mc.Get("Thierry")
+        _, memErr := mc.Get("CustomerService")
         
         if memErr == nil {
 
@@ -77,10 +79,10 @@ func registerHandler(response http.ResponseWriter, request *http.Request) {
                 log.Fatal(encErr)
             }
             value := encBuf.Bytes()
-            mc.Set(&memcache.Item{Key: "Thierry", Value: []byte(value)}) // store in memcache
+            mc.Set(&memcache.Item{Key: "CustomerService", Value: []byte(value)}) // store in memcache
         }
 
-        _, memErr = mc.Get("Ramsey")
+        _, memErr = mc.Get("ApplicationCenter")
         
         if memErr == nil {
 
@@ -93,7 +95,7 @@ func registerHandler(response http.ResponseWriter, request *http.Request) {
                 log.Fatal(encErr)
             }
             value := encBuf.Bytes()
-            mc.Set(&memcache.Item{Key: "Ramsey", Value: []byte(value)}) // store in memcache
+            mc.Set(&memcache.Item{Key: "ApplicationCenter", Value: []byte(value)}) // store in memcache
         }
 
         // ----------------------------------------------------------------------------------------------
@@ -311,15 +313,29 @@ func homeHandler(response http.ResponseWriter, request *http.Request) {
         sort.Slice(messages, func(i, j int) bool { 
             return messages[i].Timestamp.After(messages[j].Timestamp)
         })
-
         for i := 0; i < len(messages); i++ {
             messages[i].DisplayTime = messages[i].Timestamp.Format("Mon Jan _2 15:04:05 2006")
+        }
+
+        userMessages := []Message{}
+        for k, v := range userInfo.Messages {
+            singleMessage.Username = userInfo.Username
+            singleMessage.Timestamp = k
+            singleMessage.Text = v
+            userMessages = append(userMessages, singleMessage)
+        }
+        sort.Slice(userMessages, func(i, j int) bool { 
+            return userMessages[i].Timestamp.After(userMessages[j].Timestamp)
+        })
+        for i := 0; i < len(userMessages); i++ {
+            userMessages[i].DisplayTime = userMessages[i].Timestamp.Format("Mon Jan _2 15:04:05 2006")
         }
 
         messageBox.Username = userInfo.Username
         messageBox.Following = userInfo.Following
         messageBox.Follower = userInfo.Follower
         messageBox.Messages = messages
+        messageBox.UserMessages = userMessages
 
         t.Execute(response, messageBox)
     }
