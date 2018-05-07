@@ -11,7 +11,7 @@ import (
     "net/rpc"
 )
 
-var rpcAdrr = "107.180.40.18:42586"
+var rpcAdrr = "127.0.0.1:42586"
 
 type User struct { // capitalize the first letter of each field name as "exported" for gob 
     Username string

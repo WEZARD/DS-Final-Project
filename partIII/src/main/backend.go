@@ -148,8 +148,29 @@ func (l *Listener) UserRegister(args *User, rep *RegisterReply) error {
         value := encBuf.Bytes()
         mc.Set(&memcache.Item{Key: username, Value: []byte(value)}) // store in memcache  
         
+
+        description := "Register"
+        key := username
+        val := []byte(value)
+
+        command := Command {
+            Description: description,
+            Key: key,
+            Value: val,
+        }
+
+        servers := 3                        //3 servers
+        primaryID := GetPrimary(0, servers) //primary ID is determined by view=0
+        cfg := make_config(servers, false)
+        defer cfg.cleanup()
+        cfg.replicateOne(primaryID, command, servers) // replicate command 1000+index, expected successful replication to all servers
+        fmt.Printf(" ... Passed\n")
+    
+
         *rep = true
+
     }
+
     return nil
 }
 
@@ -392,4 +413,5 @@ func main() {
     listener := new(Listener)
     rpc.Register(listener)
     rpc.Accept(inbound)
+
 }
