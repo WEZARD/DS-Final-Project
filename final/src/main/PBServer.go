@@ -293,6 +293,36 @@ func (srv *PBServer) Start(command interface{}) (
 
 	view = srv.currentView
 	ok = true
+	
+	
+	/*go func(srv *PBServer, command interface{}, logLen int) {
+		encBuf := new(bytes.Buffer)
+        encErr := gob.NewEncoder(encBuf).Encode(command)
+        if encErr != nil {
+            log.Fatal(encErr)
+        }
+        commandEnc := []byte(encBuf.Bytes())
+		prepareArgs := &PrepareArgs {View: srv.currentView, PrimaryCommit: srv.commitIndex, Index: logLen - 1, Entry: commandEnc}
+		prepareReply := &PrepareReply {}
+		var numResponse int
+		for i := 0; i < len(srv.peers); i++ {
+			fmt.Printf("Send prepare to %d\n", i)
+			isSend := srv.sendPrepare(i, prepareArgs, prepareReply)
+			if isSend && prepareReply.Success == true {
+				numResponse++
+				if numResponse > len(srv.peers) / 2 && srv.commitIndex < logLen - 1 {
+					srv.commitIndex = logLen - 1
+				}
+			}
+		}
+	} (srv, command, len(srv.log))
+	
+	fmt.Println("Time to return value")
+	index = len(srv.log) - 1
+	view = srv.currentView
+	ok = true*/
+	
+
 	return index, view, ok
 }
 
