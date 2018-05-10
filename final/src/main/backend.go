@@ -70,7 +70,7 @@ type Listener int
 
 func (l *Listener) UserRegister(args *User, rep *RegisterReply) error {
     fmt.Println("This is UserRegister Listener...")
-    mc := memcache.New(pbServer.memcacheAddr) // brew services restart memcached
+    mc := memcache.New(pbServer.memcacheAddr) // brew services restart memcached, echo 'flush_all' | nc localhost 11211
         
     // ----------------------------------------Test Case---------------------------------------------
     testTime1 := time.Date(2018, 4, 4, 20, 00, 00, 651387237, time.UTC)
@@ -143,6 +143,28 @@ func (l *Listener) UserRegister(args *User, rep *RegisterReply) error {
         *rep = false
     } else {
         fmt.Println(memErr)
+        
+        val, memErr := mc.Get("ApplicationCenter")
+        if memErr == nil {
+            // Decode byte array to struct
+            decBuf := bytes.NewBuffer(val.Value)
+            userOut := User{}
+            decErr := gob.NewDecoder(decBuf).Decode(&userOut)
+            if decErr != nil {
+                log.Fatal(decErr)
+            }
+            now := time.Now()
+            userOut.Messages[now] = fmt.Sprintf("Welcome new user: %s! Search to see the posts!", username)
+            mc := memcache.New(pbServer.memcacheAddr)
+            mc.Delete("ApplicationCenter")
+            encBuf := new(bytes.Buffer)
+            encErr := gob.NewEncoder(encBuf).Encode(userOut)
+            if encErr != nil {
+                log.Fatal(encErr)
+            }
+            value := encBuf.Bytes()
+            mc.Set(&memcache.Item{Key: "ApplicationCenter", Value: []byte(value)})
+        }
         
         // Encode struct to byte array
         encBuf := new(bytes.Buffer)
