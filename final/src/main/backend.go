@@ -13,8 +13,6 @@ import (
     "errors"
 )
 
-
-
 type User struct { // capitalize the first letter of each field name as "exported" for gob
     Username string
     Password string
@@ -68,6 +66,7 @@ type UserCancelReply bool
 
 type Listener int
 
+// User Register Listener
 func (l *Listener) UserRegister(args *User, rep *RegisterReply) error {
     fmt.Println("This is UserRegister Listener...")
     mc := memcache.New(pbServer.memcacheAddr) // brew services restart memcached, echo 'flush_all' | nc localhost 11211
@@ -180,6 +179,7 @@ func (l *Listener) UserRegister(args *User, rep *RegisterReply) error {
     return nil
 }
 
+// User Login Listener
 func (l *Listener) UserLogin(args *User, rep *LoginReply) error {
     fmt.Println("This is UserLogin Listener...")
     mc := memcache.New(pbServer.memcacheAddr)
@@ -208,6 +208,7 @@ func (l *Listener) UserLogin(args *User, rep *LoginReply) error {
     return nil
 }
 
+// User Info Listener
 func (l *Listener) UserInfo(args *User, rep *User) error {
     fmt.Println("This is UserInfo Listener...")
     username := args.Username
@@ -222,6 +223,7 @@ func (l *Listener) UserInfo(args *User, rep *User) error {
     return nil
 }
 
+// User Home Listener
 func (l *Listener) UserHome(userInfo *User, homeInfoRep *MessageBox) error {
     fmt.Println("This is UserHome Listener...")
     mc := memcache.New(pbServer.memcacheAddr)
@@ -281,6 +283,7 @@ func (l *Listener) UserHome(userInfo *User, homeInfoRep *MessageBox) error {
     return nil
 }
 
+// User Follow Listener
 func (l *Listener) UserFollow(followArgs *UserSearch, followInfoRep *UserSearchReply) error {
     fmt.Println("This is UserFollow Listener...")
     followname := followArgs.Followname
@@ -330,6 +333,7 @@ func (l *Listener) UserFollow(followArgs *UserSearch, followInfoRep *UserSearchR
     return nil
 }
 
+// User Add Listener
 func (l *Listener) UserAdd(addArgs *UserAdd, userAddRep *UserAddReply) error {
     fmt.Println("This is UserAdd Listener...")
     mc := memcache.New(pbServer.memcacheAddr)
@@ -379,6 +383,7 @@ func (l *Listener) UserAdd(addArgs *UserAdd, userAddRep *UserAddReply) error {
     return nil
 }
 
+// User Post Listener
 func (l *Listener) UserPost(postArgs *UserPost, userPostRep *UserPostReply) error {
     fmt.Println("This is UserPost Listener...")
     now := time.Now()
@@ -401,6 +406,7 @@ func (l *Listener) UserPost(postArgs *UserPost, userPostRep *UserPostReply) erro
     return nil
 }
 
+// User Cancel Listener
 func (l *Listener) UserCancel(cancelArgs *User, userCancelRep *UserCancelReply) error {
     fmt.Println("This is UserCancel Listener...")
     mc := memcache.New(pbServer.memcacheAddr)
@@ -432,6 +438,7 @@ type StartBackendArgs struct {
 
 type StartBackendReply bool
 
+// Start Backend Listener
 func (l *Listener) StartBackend(args *StartBackendArgs, reply *StartBackendReply) error {//clientEnds []ClientEnd, pos int, memAddr string) *Backend{
     fmt.Println("This is StartBackend listener...")
     
@@ -448,6 +455,7 @@ type Comm struct {
 
 var resp interface{}
 
+// Forward Command Listener
 func (l *Listener) ForwardCommand(command *Comm, response *interface{}) error {
     fmt.Println("This is ForwardCommand listener...")
     pbServer.Start(command)
@@ -463,6 +471,7 @@ func (l *Listener) ForwardCommand(command *Comm, response *interface{}) error {
     return nil
 }
 
+// Unpackage PBServer Call Listener
 func (l *Listener) UnpackagePBServerCall(args *CallPBServerArgs, replys *CallPBServerReplys) error {
     fmt.Println("This is UnpackagePBServerCall listener...")
     svcMeth := args.SvcMeth
@@ -470,6 +479,7 @@ func (l *Listener) UnpackagePBServerCall(args *CallPBServerArgs, replys *CallPBS
     //svcReply := args.SvcReplys
     gob.Register(Comm{})
     if svcMeth == "PBServer.Prepare" {
+        fmt.Println("This is PBServer Prepare Call...")
         decBuf := bytes.NewBuffer((args.SvcArgs).([]byte))
         prepareArgs := PrepareArgs{}
         decErr := gob.NewDecoder(decBuf).Decode(&prepareArgs)
@@ -486,6 +496,7 @@ func (l *Listener) UnpackagePBServerCall(args *CallPBServerArgs, replys *CallPBS
 
         pbServer.Prepare(&prepareArgs, &prepareReply, l)
     } else if svcMeth == "PBServer.Recovery" {
+        fmt.Println("This is PBServer Recovery Call...")
         decBuf := bytes.NewBuffer((args.SvcArgs).([]byte))
         recoveryArgs := RecoveryArgs{}
         decErr := gob.NewDecoder(decBuf).Decode(&recoveryArgs)
@@ -502,6 +513,7 @@ func (l *Listener) UnpackagePBServerCall(args *CallPBServerArgs, replys *CallPBS
 
         pbServer.Recovery(&recoveryArgs, &recoveryReply)
     } else if svcMeth == "PBServer.ViewChange" {
+        fmt.Println("This is PBServer ViewChange Call...")
         decBuf := bytes.NewBuffer((args.SvcArgs).([]byte))
         viewChangeArgs := ViewChangeArgs{}
         decErr := gob.NewDecoder(decBuf).Decode(&viewChangeArgs)
@@ -518,6 +530,7 @@ func (l *Listener) UnpackagePBServerCall(args *CallPBServerArgs, replys *CallPBS
 
         pbServer.ViewChange(&viewChangeArgs, &viewChangeReply)
     } else if svcMeth == "PBServer.StartView" {
+        fmt.Println("This is PBServer StartView Call...")
         decBuf := bytes.NewBuffer((args.SvcArgs).([]byte))
         startViewArgs := StartViewArgs{}
         decErr := gob.NewDecoder(decBuf).Decode(&startViewArgs)

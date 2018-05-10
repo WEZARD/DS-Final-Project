@@ -73,7 +73,7 @@ func (e *ClientEnd) Call(svcMeth string, args interface{}, reply interface{}) bo
     argsEnc := []byte(encBuf.Bytes())
 
     fmt.Println(reflect.TypeOf(argsEnc))
-    fmt.Println(argsEnc)
+    //fmt.Println(argsEnc)
             
     encErr = gob.NewEncoder(encBuf).Encode(reply)
     if encErr != nil {
@@ -538,7 +538,7 @@ func (srv *PBServer) LogAppend(entry interface{}, l *Listener) bool{
 	
 	fmt.Println(comm)
 	if comm.BEMeth == "Listener.UserRegister" {
-		fmt.Println("Append on UserRegister...")
+		fmt.Println("Log Append on UserRegister...")
 		decBuf := bytes.NewBuffer((comm.Args).([]byte))
         user := User{}
         decErr := gob.NewDecoder(decBuf).Decode(&user)
@@ -555,10 +555,11 @@ func (srv *PBServer) LogAppend(entry interface{}, l *Listener) bool{
 		l.UserRegister(&user, &registerReply)
 		fmt.Println(registerReply)
 		resp = registerReply
+		fmt.Printf("User %s Register %v\n", user.Username, registerReply)
 		return true
 	}
 	if comm.BEMeth ==  "Listener.UserLogin" {
-		fmt.Println("Append on UserLogin...")
+		fmt.Println("Log Append on UserLogin...")
 		decBuf := bytes.NewBuffer((comm.Args).([]byte))
         user := User{}
         decErr := gob.NewDecoder(decBuf).Decode(&user)
@@ -574,11 +575,12 @@ func (srv *PBServer) LogAppend(entry interface{}, l *Listener) bool{
         }
 		l.UserLogin(&user, &loginReply)
 		resp = loginReply
+		fmt.Printf("User %s Login %v\n", user.Username, loginReply)
 		//l.UserLogin((comm.Args).(*User), (comm.Reply).(*LoginReply))
 		return true
 	}
 	if comm.BEMeth ==  "Listener.UserInfo" {
-		fmt.Println("Append on UserInfo...")
+		fmt.Println("Log Append on UserInfo...")
 		decBuf := bytes.NewBuffer((comm.Args).([]byte))
         user := User{}
         decErr := gob.NewDecoder(decBuf).Decode(&user)
@@ -594,11 +596,12 @@ func (srv *PBServer) LogAppend(entry interface{}, l *Listener) bool{
         }
 		l.UserInfo(&user, &userRep)
 		resp = userRep
+		fmt.Printf("User %s getUserInfo\n", user.Username)
 		//l.UserInfo((comm.Args).(*User), (comm.Reply).(*User))
 		return true
 	}
 	if comm.BEMeth ==  "Listener.UserHome" {
-		fmt.Println("Append on UserHome...")
+		fmt.Println("Log Append on UserHome...")
 		decBuf := bytes.NewBuffer((comm.Args).([]byte))
         user := User{}
         decErr := gob.NewDecoder(decBuf).Decode(&user)
@@ -614,10 +617,11 @@ func (srv *PBServer) LogAppend(entry interface{}, l *Listener) bool{
         }
 		l.UserHome(&user, &messageBox)
 		resp = messageBox
+		fmt.Printf("User %s Home Page\n", user.Username)
 		return true
 	}
 	if comm.BEMeth ==  "Listener.UserFollow" {
-		fmt.Println("Append on UserFollow...")
+		fmt.Println("Log Append on UserFollow...")
 		decBuf := bytes.NewBuffer((comm.Args).([]byte))
         userSearch := UserSearch{}
         decErr := gob.NewDecoder(decBuf).Decode(&userSearch)
@@ -633,11 +637,12 @@ func (srv *PBServer) LogAppend(entry interface{}, l *Listener) bool{
         }
 		l.UserFollow(&userSearch, &userSearchReply)
 		resp = userSearchReply
+		fmt.Printf("User %s Search User %s\n", userSearch.Userinfo.Username, userSearch.Followname)
 		//l.UserFollow((comm.Args).(*UserSearch), (comm.Reply).(*UserSearchReply))
 		return true
 	}
 	if comm.BEMeth ==  "Listener.UserAdd" {
-		fmt.Println("Append on UserAdd...")
+		fmt.Println("Log Append on UserAdd...")
 		decBuf := bytes.NewBuffer((comm.Args).([]byte))
         userAdd := UserAdd{}
         decErr := gob.NewDecoder(decBuf).Decode(&userAdd)
@@ -653,11 +658,12 @@ func (srv *PBServer) LogAppend(entry interface{}, l *Listener) bool{
         }
 		l.UserAdd(&userAdd, &userAddReply)
 		resp = userAddReply
+		fmt.Printf("User %s Add User %s\n", userAdd.Username, userAdd.Followname)
 		//l.UserFollow((comm.Args).(*UserSearch), (comm.Reply).(*UserSearchReply))
 		return true
 	}
 	if comm.BEMeth ==  "Listener.UserPost" {
-		fmt.Println("Append on UserPost...")
+		fmt.Println("Log Append on UserPost...")
 		decBuf := bytes.NewBuffer((comm.Args).([]byte))
         userPost := UserPost{}
         decErr := gob.NewDecoder(decBuf).Decode(&userPost)
@@ -673,10 +679,11 @@ func (srv *PBServer) LogAppend(entry interface{}, l *Listener) bool{
         }
 		l.UserPost(&userPost, &userPostReply)
 		resp = userPostReply
+		fmt.Printf("User %s Post Content %s\n", userPost.Userinfo.Username, userPost.Content)
 		return true
 	}
 	if comm.BEMeth ==  "Listener.UserCancel" {
-		fmt.Println("Append on UserCancel...")
+		fmt.Println("Log Append on UserCancel...")
 		decBuf := bytes.NewBuffer((comm.Args).([]byte))
         user := User{}
         decErr := gob.NewDecoder(decBuf).Decode(&user)
@@ -692,6 +699,7 @@ func (srv *PBServer) LogAppend(entry interface{}, l *Listener) bool{
         }
 		l.UserCancel(&user, &userCancelReply)
 		resp = userCancelReply
+		fmt.Printf("User %s Cancel Account %v\n", user.Username, userCancelReply)
 		return true
 	}
 
